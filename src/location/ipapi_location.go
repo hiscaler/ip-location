@@ -40,12 +40,16 @@ func (this *IpApiLocation) Find() (*IpApiLocation, error) {
 				Zip         string
 			}{}
 			if err := json.Unmarshal([]byte(this.data), &t); err == nil {
-				this.CountryId = t.CountryCode
-				this.CountryName = t.Country
-				this.ProvinceId = t.Region
-				this.ProvinceName = t.RegionName
-				this.CityName = t.City
-				this.IspName = t.Isp
+				if t.Status != "fail" {
+					this.Success = true
+					this.Ip = t.Query
+					this.CountryId = t.CountryCode
+					this.CountryName = t.Country
+					this.ProvinceId = t.Region
+					this.ProvinceName = t.RegionName
+					this.CityName = t.City
+					this.IspName = t.Isp
+				}
 
 				return this, nil
 			} else {
