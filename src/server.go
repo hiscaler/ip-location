@@ -8,11 +8,18 @@ import (
 	"log"
 	"net/http"
 	"response"
+	"strings"
+)
+
+const (
+	FormatNormal = "normal"
+	FormatJson   = "json"
 )
 
 func QueryIpInformation(w http.ResponseWriter, req *http.Request) {
 	resp := response.Response{}
-	ip := req.URL.Query().Get("ip")
+	q := req.URL.Query()
+	ip := strings.TrimSpace(q.Get("ip"))
 	ipLocation := location.PcOnlineLocation{}
 	ipLocation.SetIp(ip)
 	if v, err := ipLocation.Find(); err == nil {
@@ -38,8 +45,22 @@ func QueryIpInformation(w http.ResponseWriter, req *http.Request) {
 	}
 	log.Println("Query IP: "+ip, fmt.Sprintf("%+v", resp))
 
-	b, _ := json.Marshal(resp)
-	io.WriteString(w, string(b))
+	ws := ""
+	switch strings.ToLower(q.Get("_format")) {
+	case FormatNormal:
+		b, _ := json.Marshal(resp.Data)
+		variableName := strings.TrimSpace(q.Get("name"))
+		if variableName == "" {
+			variableName = "_ipLocation"
+		}
+		ws = "var " + variableName + "=" + string(b) + ";"
+
+	default:
+		b, _ := json.Marshal(resp)
+		ws = string(b)
+	}
+
+	io.WriteString(w, ws)
 }
 
 // IP 地址信息查询
