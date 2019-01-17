@@ -3,6 +3,7 @@ package location
 // whois.pconline.com.cn
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -14,7 +15,7 @@ type PcOnlineLocation struct {
 
 func (this *PcOnlineLocation) Find() (*PcOnlineLocation, error) {
 	client := &http.Client{}
-	req, _ := http.NewRequest("GET", "http://whois.pconline.com.cn/ipJson.jsp", strings.NewReader("ip="+this.Ip))
+	req, _ := http.NewRequest("GET", "http://whois.pconline.com.cn/ipJson.jsp?ip="+this.Ip, nil)
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36")
 	req.Header.Set("Host", "whois.pconline.com.cn")
 	req.Header.Set("Pragma", "no-cache")
@@ -38,27 +39,34 @@ func (this *PcOnlineLocation) Find() (*PcOnlineLocation, error) {
 				Region      string
 				Addr        string
 				RegionNames string
+				Err         string
 			}{}
 			if err := json.Unmarshal([]byte(this.data), &t); err == nil {
-				this.ProvinceId = t.ProCode
-				this.ProvinceName = t.Pro
-				this.CityId = t.CityCode
-				this.CityName = t.City
-				this.RegionId = t.RegionCode
-				this.RegionName = t.Region
-
-				if t.Addr != "" && strings.Contains(t.Addr, " ") {
-					addr := strings.Fields(t.Addr)
-					if len(addr) >= 2 {
-						this.Address = addr[0]
-						this.IspName = addr[1]
+				if t.Err == "" {
+					this.Success = true
+					this.Ip = t.Ip
+					this.ProvinceId = t.ProCode
+					this.ProvinceName = t.Pro
+					this.CityId = t.CityCode
+					this.CityName = t.City
+					this.RegionId = t.RegionCode
+					this.RegionName = t.Region
+					if t.Addr != "" && strings.Contains(t.Addr, " ") {
+						addr := strings.Fields(t.Addr)
+						if len(addr) >= 2 {
+							this.Address = addr[0]
+							this.IspName = addr[1]
+						} else {
+							this.Address = t.Addr
+						}
 					} else {
 						this.Address = t.Addr
 					}
+
+					return this, nil
 				} else {
-					this.Address = t.Addr
+					return this, errors.New(t.Err)
 				}
-				return this, nil
 			} else {
 				return this, err
 			}
