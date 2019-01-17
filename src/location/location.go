@@ -13,6 +13,7 @@ import (
 )
 
 type Location struct {
+	Success      bool
 	rawData      string
 	data         string
 	Ip           string
@@ -67,7 +68,7 @@ func ToUTF8(from string, s []byte) ([]byte, error) {
 	default:
 		return s, errors.New("Unsupported encoding " + from)
 	}
-	
+
 	d, e := ioutil.ReadAll(reader)
 	if e != nil {
 		return nil, e
