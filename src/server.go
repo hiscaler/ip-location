@@ -17,6 +17,8 @@ const (
 )
 
 func QueryIpInformation(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Add("Access-Control-Allow-Headers", "Content-Type")
 	resp := response.Response{}
 	q := req.URL.Query()
 	ip := strings.TrimSpace(q.Get("ip"))
