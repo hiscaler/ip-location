@@ -3,8 +3,10 @@ package location
 // freeapi.ipip.net
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 type IpIpLocation struct {
@@ -24,18 +26,24 @@ func (this *IpIpLocation) Find() (*IpIpLocation, error) {
 		if body, err := ioutil.ReadAll(resp.Body); err == nil {
 			this.rawData = string(body)
 			this.data = this.rawData
-			t := [5]string{}
-			if err := json.Unmarshal([]byte(this.data), &t); err == nil {
-				this.CountryName = t[0]
-				this.ProvinceName = t[1]
-				this.CityName = t[2]
-				this.RegionName = t[3]
-				this.IspName = t[4]
+			if !strings.Contains(this.rawData, "not found") {
+				t := [5]string{}
+				if err := json.Unmarshal([]byte(this.data), &t); err == nil {
+					this.Success = true
+					this.CountryName = t[0]
+					this.ProvinceName = t[1]
+					this.CityName = t[2]
+					this.RegionName = t[3]
+					this.IspName = t[4]
 
-				return this, nil
+					return this, nil
+				} else {
+					return this, err
+				}
 			} else {
-				return this, err
+				return this, errors.New(this.rawData)
 			}
+
 		} else {
 			return this, err
 		}
