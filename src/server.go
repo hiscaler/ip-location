@@ -14,6 +14,7 @@ import (
 const (
 	FormatNormal = "normal"
 	FormatJson   = "json"
+	FormatJsonp  = "jsonp"
 )
 
 func QueryIpInformation(w http.ResponseWriter, req *http.Request) {
@@ -57,22 +58,31 @@ func QueryIpInformation(w http.ResponseWriter, req *http.Request) {
 	}
 	log.Println("Query IP: "+ip, fmt.Sprintf("%+v", resp))
 
-	ws := ""
-	switch strings.ToLower(q.Get("_format")) {
+	data := ""
+	switch format {
 	case FormatNormal:
 		b, _ := json.Marshal(resp.Data)
 		variableName := strings.TrimSpace(q.Get("name"))
 		if variableName == "" {
 			variableName = "_ipLocation"
 		}
-		ws = "var " + variableName + "=" + string(b) + ";"
+		data = fmt.Sprintf("var %s=%s;", variableName, string(b))
+
+	case FormatJsonp:
+		b, _ := json.Marshal(resp.Data)
+		data = string(b)
+		callback := strings.TrimSpace(q.Get("callback"))
+		if callback == "" {
+			callback = "callback"
+		}
+		data = fmt.Sprintf("%s(%s);", callback, data)
 
 	default:
 		b, _ := json.Marshal(resp)
-		ws = string(b)
+		data = string(b)
 	}
 
-	io.WriteString(w, ws)
+	io.WriteString(w, data)
 }
 
 // IP 地址信息查询
