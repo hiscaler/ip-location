@@ -70,12 +70,11 @@ func QueryIpInformation(w http.ResponseWriter, req *http.Request) {
 
 	case FormatJsonp:
 		b, _ := json.Marshal(resp.Data)
-		data = string(b)
 		callback := strings.TrimSpace(q.Get("callback"))
 		if callback == "" {
 			callback = "callback"
 		}
-		data = fmt.Sprintf("%s(%s);", callback, data)
+		data = fmt.Sprintf("%s(%s);", callback, string(b))
 
 	default:
 		b, _ := json.Marshal(resp)
