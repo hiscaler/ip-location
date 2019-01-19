@@ -17,10 +17,20 @@ const (
 )
 
 func QueryIpInformation(w http.ResponseWriter, req *http.Request) {
+	q := req.URL.Query()
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Add("Access-Control-Allow-Headers", "Content-Type")
+	format := strings.ToLower(q.Get("_format"))
+	contentType := ""
+	switch format {
+	case FormatJson:
+		contentType = "application/json; charset=UTF-8"
+
+	default:
+		contentType = "application/javascript; charset=UTF-8"
+	}
+	w.Header().Set("Content-Type", contentType)
 	resp := response.Response{}
-	q := req.URL.Query()
 	ip := strings.TrimSpace(q.Get("ip"))
 	ipLocation := location.PcOnlineLocation{}
 	ipLocation.SetIp(ip)
