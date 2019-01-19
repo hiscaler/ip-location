@@ -1,6 +1,7 @@
 package main
 
 import (
+	"config"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"response"
+	"strconv"
 	"strings"
 )
 
@@ -16,6 +18,12 @@ const (
 	FormatJson   = "json"
 	FormatJsonp  = "jsonp"
 )
+
+var cfg *config.Config
+
+func init() {
+	cfg = config.NewConfig()
+}
 
 func QueryIpInformation(w http.ResponseWriter, req *http.Request) {
 	q := req.URL.Query()
@@ -89,12 +97,12 @@ func main() {
 	log.Println("Begin start server")
 	http.HandleFunc("/q", QueryIpInformation)
 	done := make(chan bool)
-	port := "8765"
+	port := strconv.Itoa(cfg.Port)
 	go func() {
 		if err := http.ListenAndServe(":"+port, nil); err != nil {
 			log.Fatal("Start serve failed, ", err)
 		}
 	}()
-	log.Printf("Server started successful, port is " + port)
+	log.Printf("Server started successful, port is " + port + ", please access http://127.0.0.1:" + port + "/q?ip=you-ip-address to query you ip location information.")
 	<-done
 }
