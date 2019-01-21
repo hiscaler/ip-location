@@ -16,6 +16,7 @@ type Location struct {
 	Success      bool
 	rawData      string
 	data         string
+	Name         string
 	Ip           string
 	IspId        string
 	IspName      string
