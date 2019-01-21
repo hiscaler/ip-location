@@ -3,7 +3,6 @@ package location
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 )
@@ -13,7 +12,7 @@ type TaoBaoLocation struct {
 }
 
 func (t *TaoBaoLocation) Find() (Location, error) {
-	fmt.Println("http://ip.taobao.com/service/getIpInfo.php?ip=" + t.Ip)
+	t.Name = "TaoBao"
 	resp, err := http.Get("http://ip.taobao.com/service/getIpInfo.php?ip=" + t.Ip)
 	if err == nil {
 		defer resp.Body.Close()

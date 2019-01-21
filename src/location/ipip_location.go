@@ -13,9 +13,10 @@ type IpIpLocation struct {
 	Location
 }
 
-func (this *IpIpLocation) Find() (*IpIpLocation, error) {
+func (t *IpIpLocation) Find() (Location, error) {
+	t.Name = "IPIP"
 	client := &http.Client{}
-	req, _ := http.NewRequest("GET", "http://freeapi.ipip.net/"+this.Ip, nil)
+	req, _ := http.NewRequest("GET", "http://freeapi.ipip.net/"+t.Ip, nil)
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36")
 	req.Header.Set("Host", "freeapi.ipip.net")
 	req.Header.Set("Cache-Control", "no-cache")
@@ -24,30 +25,30 @@ func (this *IpIpLocation) Find() (*IpIpLocation, error) {
 	if err == nil {
 		defer resp.Body.Close()
 		if body, err := ioutil.ReadAll(resp.Body); err == nil {
-			this.rawData = string(body)
-			this.data = this.rawData
-			if !strings.Contains(this.rawData, "not found") {
-				t := [5]string{}
-				if err := json.Unmarshal([]byte(this.data), &t); err == nil {
-					this.Success = true
-					this.CountryName = t[0]
-					this.ProvinceName = t[1]
-					this.CityName = t[2]
-					this.RegionName = t[3]
-					this.IspName = t[4]
+			t.rawData = string(body)
+			t.data = t.rawData
+			if !strings.Contains(t.rawData, "not found") {
+				respJson := [5]string{}
+				if err := json.Unmarshal([]byte(t.data), &respJson); err == nil {
+					t.Success = true
+					t.CountryName = respJson[0]
+					t.ProvinceName = respJson[1]
+					t.CityName = respJson[2]
+					t.RegionName = respJson[3]
+					t.IspName = respJson[4]
 
-					return this, nil
+					return t.Location, nil
 				} else {
-					return this, err
+					return t.Location, err
 				}
 			} else {
-				return this, errors.New(this.rawData)
+				return t.Location, errors.New(t.rawData)
 			}
 
 		} else {
-			return this, err
+			return t.Location, err
 		}
 	}
 
-	return this, err
+	return t.Location, err
 }

@@ -11,9 +11,10 @@ type IpApiLocation struct {
 	Location
 }
 
-func (this *IpApiLocation) Find() (*IpApiLocation, error) {
+func (t *IpApiLocation) Find() (Location, error) {
+	t.Name = "IP-API"
 	client := &http.Client{}
-	req, _ := http.NewRequest("GET", "http://ip-api.com/json/"+this.Ip+"?lang=zh-CN", nil)
+	req, _ := http.NewRequest("GET", "http://ip-api.com/json/"+t.Ip+"?lang=zh-CN", nil)
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36")
 	req.Header.Set("Host", "ip-api.com")
 	req.Header.Set("Cache-Control", "no-cache")
@@ -22,9 +23,9 @@ func (this *IpApiLocation) Find() (*IpApiLocation, error) {
 	if err == nil {
 		defer resp.Body.Close()
 		if body, err := ioutil.ReadAll(resp.Body); err == nil {
-			this.rawData = string(body)
-			this.data = this.rawData
-			t := struct {
+			t.rawData = string(body)
+			t.data = t.rawData
+			respJson := struct {
 				As          string
 				City        string
 				Country     string
@@ -39,26 +40,26 @@ func (this *IpApiLocation) Find() (*IpApiLocation, error) {
 				TimeZone    string
 				Zip         string
 			}{}
-			if err := json.Unmarshal([]byte(this.data), &t); err == nil {
-				if t.Status != "fail" {
-					this.Success = true
-					this.Ip = t.Query
-					this.CountryId = t.CountryCode
-					this.CountryName = t.Country
-					this.ProvinceId = t.Region
-					this.ProvinceName = t.RegionName
-					this.CityName = t.City
-					this.IspName = t.Isp
+			if err := json.Unmarshal([]byte(t.data), &respJson); err == nil {
+				if respJson.Status != "fail" {
+					t.Success = true
+					t.Ip = respJson.Query
+					t.CountryId = respJson.CountryCode
+					t.CountryName = respJson.Country
+					t.ProvinceId = respJson.Region
+					t.ProvinceName = respJson.RegionName
+					t.CityName = respJson.City
+					t.IspName = respJson.Isp
 				}
 
-				return this, nil
+				return t.Location, nil
 			} else {
-				return this, err
+				return t.Location, err
 			}
 		} else {
-			return this, err
+			return t.Location, err
 		}
 	}
 
-	return this, err
+	return t.Location, err
 }

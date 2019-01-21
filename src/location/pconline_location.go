@@ -13,9 +13,10 @@ type PcOnlineLocation struct {
 	Location
 }
 
-func (this *PcOnlineLocation) Find() (*PcOnlineLocation, error) {
+func (t *PcOnlineLocation) Find() (Location, error) {
+	t.Name = "PC Online"
 	client := &http.Client{}
-	req, _ := http.NewRequest("GET", "http://whois.pconline.com.cn/ipJson.jsp?ip="+this.Ip, nil)
+	req, _ := http.NewRequest("GET", "http://whois.pconline.com.cn/ipJson.jsp?ip="+t.Ip, nil)
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36")
 	req.Header.Set("Host", "whois.pconline.com.cn")
 	req.Header.Set("Pragma", "no-cache")
@@ -24,12 +25,12 @@ func (this *PcOnlineLocation) Find() (*PcOnlineLocation, error) {
 		defer resp.Body.Close()
 		if body, err := ioutil.ReadAll(resp.Body); err == nil {
 			body, _ := ToUTF8("gb18030", body)
-			this.rawData = string(body)
-			s := strings.TrimSpace(this.rawData)
+			t.rawData = string(body)
+			s := strings.TrimSpace(t.rawData)
 			s = strings.Replace(s, "if(window.IPCallBack) {IPCallBack(", "", 1)
 			s = strings.Replace(s, ");}", "", 1)
-			this.data = s
-			t := struct {
+			t.data = s
+			respJson := struct {
 				Ip          string
 				ProCode     string
 				Pro         string
@@ -41,39 +42,39 @@ func (this *PcOnlineLocation) Find() (*PcOnlineLocation, error) {
 				RegionNames string
 				Err         string
 			}{}
-			if err := json.Unmarshal([]byte(this.data), &t); err == nil {
-				if t.Err == "" {
-					this.Success = true
-					this.Ip = t.Ip
-					this.ProvinceId = t.ProCode
-					this.ProvinceName = t.Pro
-					this.CityId = t.CityCode
-					this.CityName = t.City
-					this.RegionId = t.RegionCode
-					this.RegionName = t.Region
-					if t.Addr != "" && strings.Contains(t.Addr, " ") {
-						addr := strings.Fields(t.Addr)
+			if err := json.Unmarshal([]byte(t.data), &respJson); err == nil {
+				if respJson.Err == "" {
+					t.Success = true
+					t.Ip = respJson.Ip
+					t.ProvinceId = respJson.ProCode
+					t.ProvinceName = respJson.Pro
+					t.CityId = respJson.CityCode
+					t.CityName = respJson.City
+					t.RegionId = respJson.RegionCode
+					t.RegionName = respJson.Region
+					if respJson.Addr != "" && strings.Contains(respJson.Addr, " ") {
+						addr := strings.Fields(respJson.Addr)
 						if len(addr) >= 2 {
-							this.Address = addr[0]
-							this.IspName = addr[1]
+							t.Address = addr[0]
+							t.IspName = addr[1]
 						} else {
-							this.Address = t.Addr
+							t.Address = respJson.Addr
 						}
 					} else {
-						this.Address = t.Addr
+						t.Address = respJson.Addr
 					}
 
-					return this, nil
+					return t.Location, nil
 				} else {
-					return this, errors.New(t.Err)
+					return t.Location, errors.New(respJson.Err)
 				}
 			} else {
-				return this, err
+				return t.Location, err
 			}
 		} else {
-			return this, err
+			return t.Location, err
 		}
 	}
 
-	return this, err
+	return t.Location, err
 }
