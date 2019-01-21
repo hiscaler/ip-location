@@ -41,7 +41,6 @@ func QueryIpInformation(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", contentType)
 	resp := response.Response{}
 	ip := strings.TrimSpace(q.Get("ip"))
-	ipLocation := location.Location{}
 	ch := make(chan location.Location)
 
 	ok := make(chan bool)
@@ -109,8 +108,7 @@ func QueryIpInformation(w http.ResponseWriter, req *http.Request) {
 
 	go func() {
 		select {
-		case v := <-ch:
-			ipLocation = v
+		case ipLocation := <-ch:
 			resp.Success = ipLocation.Success
 			if ipLocation.Success {
 				resp.Data.Name = ipLocation.Name
