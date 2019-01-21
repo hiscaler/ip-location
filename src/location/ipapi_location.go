@@ -3,6 +3,7 @@ package location
 // http://ip-api.com
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 )
@@ -50,9 +51,11 @@ func (t *IpApiLocation) Find() (Location, error) {
 					t.ProvinceName = respJson.RegionName
 					t.CityName = respJson.City
 					t.IspName = respJson.Isp
-				}
 
-				return t.Location, nil
+					return t.Location, nil
+				} else {
+					return t.Location, errors.New("Fail")
+				}
 			} else {
 				return t.Location, err
 			}
