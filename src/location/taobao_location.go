@@ -12,7 +12,7 @@ type TaoBaoLocation struct {
 	Location
 }
 
-func (t *TaoBaoLocation) Find() (*TaoBaoLocation, error) {
+func (t *TaoBaoLocation) Find() (Location, error) {
 	fmt.Println("http://ip.taobao.com/service/getIpInfo.php?ip=" + t.Ip)
 	resp, err := http.Get("http://ip.taobao.com/service/getIpInfo.php?ip=" + t.Ip)
 	if err == nil {
@@ -51,18 +51,18 @@ func (t *TaoBaoLocation) Find() (*TaoBaoLocation, error) {
 					t.IspId = respJson.Data.IspId
 					t.IspName = respJson.Data.Isp
 
-					return t, nil
+					return t.Location, nil
 				} else {
-					return t, errors.New(string(respJson.Code))
+					return t.Location, errors.New(string(respJson.Code))
 				}
 			} else {
-				return t, err
+				return t.Location, err
 			}
 		} else {
-			return t, err
+			return t.Location, err
 		}
 	} else {
-		return t, err
+		return t.Location, err
 	}
-	return t, err
+	return t.Location, err
 }
