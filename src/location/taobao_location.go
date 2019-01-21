@@ -76,9 +76,7 @@ func (t *TaoBaoLocation) Find() (Location, error) {
 		} else {
 			return t.Location, err
 		}
-
-	} else {
-		return t.Location, err
 	}
+
 	return t.Location, err
 }
