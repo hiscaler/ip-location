@@ -41,30 +41,99 @@ func QueryIpInformation(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", contentType)
 	resp := response.Response{}
 	ip := strings.TrimSpace(q.Get("ip"))
-	ipLocation := location.PcOnlineLocation{}
-	ipLocation.SetIp(ip)
-	if v, err := ipLocation.Find(); err == nil {
-		resp.Success = v.Success
-		if v.Success {
-			resp.Data.Ip = v.Ip
-			resp.Data.IspId = v.IspId
-			resp.Data.IspName = v.IspName
-			resp.Data.CountryId = v.CountryId
-			resp.Data.CountryName = v.CountryName
-			resp.Data.AreaId = v.AreaId
-			resp.Data.AreaName = v.AreaName
-			resp.Data.ProvinceId = v.ProvinceId
-			resp.Data.ProvinceName = v.ProvinceName
-			resp.Data.CityId = v.CityId
-			resp.Data.CityName = v.CityName
-			resp.Data.RegionId = v.RegionId
-			resp.Data.RegionName = v.RegionName
-			resp.Data.Address = v.Address
-		}
-	} else {
-		log.Println("Error: ", err)
+	ipLocation := location.Location{}
+	ch := make(chan location.Location)
+
+	ok := make(chan bool)
+	locations := []string{
+		"pconline",
+		"ipip",
+		"ipapi",
+		"taobao",
 	}
-	log.Println("Query IP: "+ip, fmt.Sprintf("%+v", resp))
+
+	for _, locationType := range locations {
+		var base location.Location
+		var err error
+		switch locationType {
+		case "pconline":
+			go func() {
+				l := location.PcOnlineLocation{}
+				l.SetIp(ip)
+				if base, err = l.Find(); err == nil {
+					ok <- true
+					ch <- base
+				} else {
+					log.Println("Error: ", err)
+				}
+			}()
+
+		case "ipip":
+			go func() {
+				l := location.IpIpLocation{}
+				l.SetIp(ip)
+				if base, err = l.Find(); err == nil {
+					ok <- true
+					ch <- base
+				} else {
+					log.Println("Error: ", err)
+				}
+			}()
+
+		case "ipapi":
+			go func() {
+				l := location.IpApiLocation{}
+				l.SetIp(ip)
+				if base, err = l.Find(); err == nil {
+					ok <- true
+					ch <- base
+				} else {
+					log.Println("Error: ", err)
+				}
+			}()
+
+		case "taobao":
+			go func() {
+				l := location.TaoBaoLocation{}
+				l.SetIp(ip)
+				if base, err = l.Find(); err == nil {
+					ok <- true
+					ch <- base
+				} else {
+					log.Println("Error: ", err)
+				}
+			}()
+		}
+
+	}
+
+	go func() {
+		select {
+		case v := <-ch:
+			ipLocation = v
+			resp.Success = ipLocation.Success
+			if ipLocation.Success {
+				resp.Data.Name = ipLocation.Name
+				resp.Data.Ip = ipLocation.Ip
+				resp.Data.IspId = ipLocation.IspId
+				resp.Data.IspName = ipLocation.IspName
+				resp.Data.CountryId = ipLocation.CountryId
+				resp.Data.CountryName = ipLocation.CountryName
+				resp.Data.AreaId = ipLocation.AreaId
+				resp.Data.AreaName = ipLocation.AreaName
+				resp.Data.ProvinceId = ipLocation.ProvinceId
+				resp.Data.ProvinceName = ipLocation.ProvinceName
+				resp.Data.CityId = ipLocation.CityId
+				resp.Data.CityName = ipLocation.CityName
+				resp.Data.RegionId = ipLocation.RegionId
+				resp.Data.RegionName = ipLocation.RegionName
+				resp.Data.Address = ipLocation.Address
+			}
+
+			log.Println("Query IP: "+ip, fmt.Sprintf("%+v", resp))
+		}
+	}()
+	<-ok
 
 	data := ""
 	switch format {

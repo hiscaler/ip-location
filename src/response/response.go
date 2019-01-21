@@ -4,6 +4,7 @@ type Response struct {
 	Success bool `json:"success"`
 	Data    struct {
 		Ip           string `json:"ip"`
+		Name         string `json:"name"`
 		IspId        string `json:"isp_id"`
 		IspName      string `json:"isp_name"`
 		CountryId    string `json:"country_id"`

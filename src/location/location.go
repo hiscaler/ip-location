@@ -13,9 +13,9 @@ import (
 )
 
 type Location struct {
-	Success      bool
 	rawData      string
 	data         string
+	Success      bool
 	Name         string
 	Ip           string
 	IspId        string
@@ -34,17 +34,15 @@ type Location struct {
 }
 
 type IpLocation interface {
-	SetIp(ip string) *Location
-	Find() (*Location, error)
+	Find() (Location, error)
 }
 
-func (this *Location) SetIp(ip string) *Location {
-	this.Ip = strings.Trim(ip, " ")
-	return this
+func (t *Location) SetIp(ip string) {
+	t.Ip = strings.Trim(ip, " ")
 }
 
-func (this *Location) Find() (*Location, error) {
-	return this, nil
+func (t *Location) Find() (Location, error) {
+	return *t, errors.New("Not implemented.")
 }
 
 func ToUTF8(from string, s []byte) ([]byte, error) {
