@@ -22,6 +22,7 @@ const (
 var cfg *config.Config
 
 func init() {
+	log.SetFlags(log.Ldate | log.Lshortfile)
 	cfg = config.NewConfig()
 }
 
