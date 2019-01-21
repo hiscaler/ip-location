@@ -21,8 +21,8 @@ func (t *PcOnlineLocation) Find() (Location, error) {
 	req.Header.Set("Host", "whois.pconline.com.cn")
 	req.Header.Set("Pragma", "no-cache")
 	resp, err := client.Do(req)
-	if err == nil {
-		defer resp.Body.Close()
+	defer resp.Body.Close()
+	if err == nil && resp.StatusCode == 200 {
 		if body, err := ioutil.ReadAll(resp.Body); err == nil {
 			body, _ := ToUTF8("gb18030", body)
 			t.rawData = string(body)

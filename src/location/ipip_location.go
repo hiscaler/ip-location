@@ -22,8 +22,8 @@ func (t *IpIpLocation) Find() (Location, error) {
 	req.Header.Set("Cache-Control", "no-cache")
 	req.Header.Set("Pragma", "no-cache")
 	resp, err := client.Do(req)
-	if err == nil {
-		defer resp.Body.Close()
+	defer resp.Body.Close()
+	if err == nil && resp.StatusCode == 200 {
 		if body, err := ioutil.ReadAll(resp.Body); err == nil {
 			t.rawData = string(body)
 			t.data = t.rawData
@@ -44,10 +44,10 @@ func (t *IpIpLocation) Find() (Location, error) {
 			} else {
 				return t.Location, errors.New(t.rawData)
 			}
-
 		} else {
 			return t.Location, err
 		}
+
 	}
 
 	return t.Location, err
