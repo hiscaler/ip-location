@@ -42,16 +42,14 @@ func QueryIpInformation(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", contentType)
 	resp := response.Response{}
 	ip := strings.TrimSpace(q.Get("ip"))
-	ch := make(chan location.Location)
-
 	ok := make(chan bool)
+	ch := make(chan location.Location)
 	locations := []string{
 		"pconline",
 		"ipip",
 		"ipapi",
 		"taobao",
 	}
-
 	for _, locationType := range locations {
 		var base location.Location
 		var err error
