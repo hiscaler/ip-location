@@ -47,7 +47,6 @@ func (t *IpIpLocation) Find() (Location, error) {
 		} else {
 			return t.Location, err
 		}
-
 	}
 
 	return t.Location, err

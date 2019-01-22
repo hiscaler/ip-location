@@ -53,6 +53,7 @@ func (t *TaoBaoLocation) Find() (Location, error) {
 					}
 				}
 				if respJson.Code == 0 {
+					t.Success = true
 					t.CountryId = parseValue(respJson.Data.CountryId)
 					t.CountryName = parseValue(respJson.Data.Country)
 					t.AreaId = parseValue(respJson.Data.AreaId)
