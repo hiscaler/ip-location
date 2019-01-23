@@ -69,7 +69,7 @@ customCallback({
 });
 ```
 
-3. http://127.0.0.1:8080/q?ip=118.249.188.173&_format=normal&name=_customerIpLocation
+3. http://127.0.0.1:8080/q?ip=118.249.188.173&_format=normal&name=_customIpLocation
 ```javascript
-var _customerIpLocation={"ip":"118.249.188.173","name":"TaoBao","isp_id":"100017","isp_name":"电信","country_id":"cn","country_name":"中国","area_id":"","area_name":"","province_id":"430000","province_name":"湖南","city_id":"430100","city_name":"长沙","region_id":"","region_name":"","address":""};
+var _customIpLocation={"ip":"118.249.188.173","name":"TaoBao","isp_id":"100017","isp_name":"电信","country_id":"cn","country_name":"中国","area_id":"","area_name":"","province_id":"430000","province_name":"湖南","city_id":"430100","city_name":"长沙","region_id":"","region_name":"","address":""};
 ```
