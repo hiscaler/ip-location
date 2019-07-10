@@ -42,6 +42,12 @@ func QueryIpInformation(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", contentType)
 	resp := response.Response{}
 	ip := strings.TrimSpace(q.Get("ip"))
+	if len(ip) == 0 {
+		ip = req.RemoteAddr
+		if i := strings.Index(ip, ":"); i != -1 {
+			ip = ip[:i]
+		}
+	}
 	ok := make(chan bool)
 	ch := make(chan location.Location)
 	locations := []string{
